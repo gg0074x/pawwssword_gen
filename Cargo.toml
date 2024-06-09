@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 dirs="5.0.1"
 rand = "0.8.5"
+thiserror = "1.0.61"
