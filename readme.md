@@ -11,5 +11,5 @@ Make all the hackers go `awww.` when they see your password contains a bunch of 
 
 ### Work in progress
 
-[ ] Be able to read the original password
-[ ] More security measures to protect your passwords in your local machine
+- [ ] Be able to read the original password
+- [ ] More security measures to protect your passwords in your local machine
