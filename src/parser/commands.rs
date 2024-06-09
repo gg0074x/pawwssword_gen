@@ -3,7 +3,7 @@ use dirs::data_local_dir;
 use super::match_arg;
 use rand::{self, Rng};
 
-pub fn register(args: &Vec<String>){
+pub fn register(args: &[String]){
     let data_path = data_local_dir().unwrap();
     let string_path = data_path.to_str().unwrap();
 
@@ -13,10 +13,9 @@ pub fn register(args: &Vec<String>){
     
     let register_index = args.iter().position(|x| x == "-r").unwrap();
     if args[register_index] != "-r"{
-        return;
-    }else if let None = args.get(register_index + 1){
-        println!("A password must be given as an argument to the register command!")
-    }else if match_arg(&args[register_index + 1], args).unwrap() {
+    }else if args.get(register_index + 1).is_none(){
+        println!("A password must be given as an argument to the register command!");
+    }else if match_arg(&args[register_index + 1], args){
         return;
     }else {
         let password = &args.get(register_index + 1).unwrap();
@@ -32,7 +31,7 @@ pub fn register(args: &Vec<String>){
     }
 }
 
-pub fn gen(args: &Vec<String>){
+pub fn gen(args: &[String]){
     let Some(data_path) = data_local_dir() else{
         eprintln!("Failed to get data path!");
         return;
@@ -46,7 +45,7 @@ pub fn gen(args: &Vec<String>){
         return;
     };
 
-    if let Err(_) = File::open(format!("{string_path}/pawwsword/passwords")) {
+    if File::open(format!("{string_path}/pawwsword/passwords")).is_err() {
         if let Err(e) = File::create(format!("{string_path}/pawwsword/passwords")){
             eprintln!("Couldn't create file to save passwords because {e}");
             return;
@@ -58,28 +57,31 @@ pub fn gen(args: &Vec<String>){
         return;
     };
     if args[generation_index] != "-g"{
-        return;
-    }else if let None = args.get(generation_index + 1){
-        println!("A password must be given as an argument to the generate command!")
-    }else if let Ok(true) = match_arg(&args[generation_index + 1], args) {
+    }else if args.get(generation_index + 1).is_none(){
+        println!("A password must be given as an argument to the generate command!");
+    }else if match_arg(&args[generation_index + 1], args) {
         println!("No argument was supplied!");
         return;
     }else {
-        let mut password = args.get(generation_index + 1).unwrap_or(&String::from("Password")).to_owned();
-        let code: i32 = rand::thread_rng().gen_range(100000..999999);
+        let Some(arg) = args.get(generation_index + 1) else{
+            eprintln!("No argument was supplied for the password generator.");
+            return;
+        };
+        let mut password = arg.to_owned();
+        let code: i32 = rand::thread_rng().gen_range(100_000..999_999);
         for c in code.to_string().chars(){
             let mut pointer = 0;
             let Ok(range): Result<i32, _> = c.to_string().parse() else{
                 return;
             };
             for _ in 0..range{
-                if pointer > password.len(){
+                if pointer > password.len() - 1{
                     pointer = 0;
                 }else {
-                    pointer = pointer + 1;
+                    pointer += 1;
                 }
             }
-            password.insert_str(pointer, "UwU")
+            password.insert_str(pointer, "UwU");
         }
         let mut file = OpenOptions::new()
         .write(true)
@@ -87,16 +89,16 @@ pub fn gen(args: &Vec<String>){
         .open(format!("{string_path}/pawwsword/passwords"))
         .unwrap();
 
-        if let Err(e) = writeln!(file, "{} {} ", code, password) {
-            eprintln!("Couldn't write to file: {}", e);
+        if let Err(e) = writeln!(file, "{code} {password} ") {
+            eprintln!("Couldn't write to file: {e}");
         }
 
-        println!("This is your new secured generated password: {}", password)
+        println!("This is your new secured generated password: {password}");
     }
 }
 
 pub fn show(){
-    let passwords: &mut String = &mut String::from("");
+    let passwords: &mut String = &mut String::new();
 
     let Some(data_path) = data_local_dir() else{
         eprintln!("Failed to get data path!");
@@ -111,14 +113,14 @@ pub fn show(){
         eprintln!("Couldn't read password file (Perhaps no passwords have been saved yet?)");
         return;
     };
-    if let Ok(_) = file.read_to_string(passwords){
+    if file.read_to_string(passwords).is_ok(){
         println!("Code:  Password:");
-        println!("{}", passwords.to_string())
+        println!("{passwords}");
     }
 }
 
 pub fn help(){
     println!("Available commands:");
     println!("       -g (password): Generate a new secure password from an existent one.");
-    println!("       -s: Show your saved passwords.")
+    println!("       -s: Show your saved passwords.");
 }
