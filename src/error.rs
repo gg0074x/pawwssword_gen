@@ -2,8 +2,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 #[error(transparent)]
-pub enum AppError {
-    Arguments(#[from] ArgsError),
+pub enum AppErrors {
+    Arguments(#[from] ArgsErrors),
     IO(#[from] std::io::Error),
 
     #[error("Failed to get data path!")]
@@ -17,10 +17,12 @@ pub enum AppError {
     CannotParse(char),
     #[error("Couldn't get the position of the password")]
     PasswordPosition,
+    #[error("Couldn't parse path into string")]
+    PathParse,
 }
 
 #[derive(Error, Debug, PartialEq, Eq)]
-pub enum ArgsError {
+pub enum ArgsErrors {
     #[error("Two flags cannot be executed at the same time")]
     TwoFlags,
     #[error("The argument {0} is not recognized")]
