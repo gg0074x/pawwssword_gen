@@ -8,8 +8,14 @@ use std::{
 use super::match_arg;
 use rand::{self, Rng};
 
+use crate::parser::Commands;
+
 pub fn register(args: &[String]) -> Result<(), AppErrors> {
-    let Ok(data_path) = data_local_dir().ok_or(AppErrors::PathNotFound)?.into_os_string().into_string() else{
+    let Ok(data_path) = data_local_dir()
+        .ok_or(AppErrors::PathNotFound)?
+        .into_os_string()
+        .into_string()
+    else {
         return Err(AppErrors::PathParse);
     };
 
@@ -36,12 +42,16 @@ pub fn register(args: &[String]) -> Result<(), AppErrors> {
             file.write_all(b"\n")?;
         }
     }
-    
+
     Ok(())
 }
 
 pub fn gen(args: &[String]) -> Result<(), AppErrors> {
-    let Ok(data_path) = data_local_dir().ok_or(AppErrors::PathNotFound)?.into_os_string().into_string() else{
+    let Ok(data_path) = data_local_dir()
+        .ok_or(AppErrors::PathNotFound)?
+        .into_os_string()
+        .into_string()
+    else {
         return Err(AppErrors::PathParse);
     };
 
@@ -54,11 +64,11 @@ pub fn gen(args: &[String]) -> Result<(), AppErrors> {
 
     let generation_index = args
         .iter()
-        .position(|x| x == "-g")
+        .position(|x| x == "generate")
         .ok_or(AppErrors::PasswordPosition)?;
 
     if args.get(generation_index + 1).is_none() {
-        return Err(ArgsErrors::ValueExpected("-g").into());
+        return Err(ArgsErrors::ValueExpected("generate").into());
     } else if match_arg(&args[generation_index + 1], args).is_ok() {
         return Err(ArgsErrors::TwoFlags.into());
     }
@@ -98,7 +108,11 @@ pub fn gen(args: &[String]) -> Result<(), AppErrors> {
 pub fn show() -> Result<(), AppErrors> {
     let mut passwords = String::default();
 
-    let Ok(data_path) = data_local_dir().ok_or(AppErrors::PathNotFound)?.into_os_string().into_string() else{
+    let Ok(data_path) = data_local_dir()
+        .ok_or(AppErrors::PathNotFound)?
+        .into_os_string()
+        .into_string()
+    else {
         return Err(AppErrors::PathParse);
     };
 
@@ -113,7 +127,22 @@ pub fn show() -> Result<(), AppErrors> {
 }
 
 pub fn help() {
-    println!("Available commands:");
-    println!("       -g (password): Generate a new secure password from an existent one.");
-    println!("       -s: Show your saved passwords.");
+    const COMMANDS: [Commands; 3] = [Commands::Generate, Commands::Show, Commands::Help];
+    println!("Pawwssword generator");
+    println!("{}Generate cute and secure passwords!", " ".repeat(4));
+    println!("{}Available commands:", " ".repeat(2));
+    for com in COMMANDS {
+        let offset = if com.to_string().len() > 4 {
+            com.to_string().len() - 4
+        } else {
+            0
+        };
+        println!(
+            "{}{} -> {}{}",
+            " ".repeat(4),
+            com.to_string(),
+            " ".repeat(20 - offset),
+            com.to_help()
+        )
+    }
 }

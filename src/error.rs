@@ -25,10 +25,10 @@ pub enum AppErrors {
 pub enum ArgsErrors {
     #[error("Two flags cannot be executed at the same time")]
     TwoFlags,
-    #[error("The argument {0} is not recognized")]
+    #[error("The command {0} is not recognized")]
     NotFound(String),
     #[error("A value was expected for the argument {0}")]
     ValueExpected(&'static str),
-    #[error("Hello! To receive a list of commands you can use -h")]
+    #[error("Hello! To receive a list of commands you can use the command 'help'")]
     InvalidInput,
 }

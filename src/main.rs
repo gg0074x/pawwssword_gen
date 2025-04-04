@@ -2,10 +2,15 @@ mod error;
 mod parser;
 use std::env;
 
-use parser::parse_args;
 use error::{AppErrors, ArgsErrors};
+use parser::parse_args;
 
-fn main() -> Result<(), AppErrors> {
+fn main() {
     let args: Vec<String> = env::args().collect();
-    parse_args(&args)
+    match parse_args(&args) {
+        Ok(()) => (),
+        Err(error) => {
+            println!("{error}")
+        }
+    }
 }

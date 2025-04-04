@@ -1,6 +1,5 @@
 use commands::{gen, help, show};
 
-use self::commands::register;
 use crate::{AppErrors, ArgsErrors};
 
 mod commands;
@@ -10,25 +9,47 @@ pub fn parse_args(args: &[String]) -> Result<(), AppErrors> {
         return Err(ArgsErrors::InvalidInput.into());
     }
 
-    for el in args {
-        if el.contains('-'){
-            match_arg(el, args)?;
-        }
-        // if !result && el.contains("-"){
-        //     println!("Command not found, try executing -h to view available commands");
-        //     return;
-        // }
-    }
+    let command = &args[1];
+
+    match_arg(&command, args)?;
 
     Ok(())
 }
 
+#[derive(Clone, Copy)]
+pub enum Commands {
+    Generate,
+    Show,
+    Help,
+}
+
+impl Commands {
+    pub fn to_string(self) -> String {
+        match self {
+            Commands::Generate => "generate",
+            Commands::Help => "help",
+            Commands::Show => "show",
+        }
+        .to_owned()
+    }
+
+    pub fn to_help(self) -> String {
+        match self {
+            Commands::Generate => {
+                "generate [PASSWORD]: Generate a new safe password from an existent one"
+            }
+            Commands::Show => "show: Show your generated passwords",
+            Commands::Help => "help: Display this message",
+        }
+        .to_owned()
+    }
+}
+
 fn match_arg(arg: &str, args: &[String]) -> Result<(), AppErrors> {
     match arg {
-        "-r" => register(args),
-        "-g" => gen(args),
-        "-s" => show(),
-        "-h" => {
+        val if val == Commands::Generate.to_string() => gen(args),
+        val if val == Commands::Show.to_string() => show(),
+        val if val == Commands::Help.to_string() => {
             help();
             Ok(())
         }
